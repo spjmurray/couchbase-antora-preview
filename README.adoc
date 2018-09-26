@@ -32,7 +32,7 @@ A typical execution of the container will look like the following:
 docker run --rm -ti \
   --publish 8080:80 \
   --mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly \
-  spjmurray/couchbase-antora-preview:1.0.0 \
+  spjmurray/couchbase-antora-preview:1.0.1 \
   master \
   docs/user
 ----
@@ -51,7 +51,7 @@ Bind unprivileged port 8080 on the host system to port 80 on the container.
 --mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly::
 Mounts your AsciiDoc repository to /src in the container.  This must be a Git repository containing at least one Antora module.
 
-spjmurray/couchbase-antora-preview:1.0.0::
+spjmurray/couchbase-antora-preview:1.0.1::
 This is the name of the container image to use.
 
 master::
