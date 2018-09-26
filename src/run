@@ -93,6 +93,15 @@ def init_repo(args):
     os.chdir(ANTORA_HOME + '/' + BASE_REPO)
     Executor.execute(['antora', PLAYBOOK])
 
+    # Calculate the URL to report back to the user
+    with open(MODULE_REPO_PATH + args.path + '/antora.yml') as filedesc:
+        module = yaml.load(filedesc.read())
+
+    page, _ = os.path.splitext(module['start_page'].split(':')[1])
+    url = module['name'] + '/' + module['version'] + '/' + page + '.html'
+
+    logging.info('Serving content on http://localhost:8080/%s', url)
+
 
 def init_httpd():
     """Start the HTTP daemon when the vhost directory is created"""
@@ -104,7 +113,7 @@ def init_httpd():
 def init_slumber():
     """Sleep until we are killed"""
 
-    logging.info('Serving content on http://localhost:8080, press Ctl+C to exit ...')
+    logging.info('Press Ctl+C to exit ...')
     while True:
         time.sleep(10)
 
