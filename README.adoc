@@ -52,7 +52,7 @@ Bind unprivileged port 8080 on the host system to port 80 on the container.
 Mounts your AsciiDoc repository to /src in the container.  This must be a Git repository containing at least one Antora module.
 
 spjmurray/couchbase-antora-preview:1.0.1::
-This is the name of the container image to use.
+This is the name of the container image to use.  Pre-built images are avaialble on https://hub.docker.com/r/spjmurray/couchbase-antora-preview/[Docker Hub].
 
 master::
 Argument passed to the container entry point.  This selects the Git branch to generate static content from.
