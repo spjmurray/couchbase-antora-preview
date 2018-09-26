@@ -1,0 +1,63 @@
+= Couchbase Antora Preview
+
+https://travis-ci.org/spjmurray/couchbase-antora-preview[image:https://travis-ci.org/spjmurray/couchbase-antora-preview.png[]]
+
+Simple container which automates the installation of Antora, compilation of Couchbase
+documentation for a single repository and display via a web server.
+
+== Installation
+
+=== Pre-requisites
+
+Ensure the following commands are installed and in your path:
+
+* make
+* docker
+
+=== Creating the container image
+
+Simply (for Richard Smedley) run the following:
+
+[source,console]
+----
+make
+----
+
+== Execution
+
+A typical execution of the container will look like the following:
+
+[source,console]
+----
+docker run --rm -ti \
+  --publish 8080:80 \
+  --mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly \
+  spjmurray/couchbase-antora-preview:0.0.1 \
+  master \
+  docs/user
+----
+
+At present all arguments are required, however certain arguments may be modified to suit your particular Antora module.
+
+--rm::
+Removes the container once execution has terminated.
+
+-ti::
+Allocate a pseudo terminal and allow input.
+
+--publish 8080:80::
+Bind unprivileged port 8080 on the host system to port 80 on the container.
+
+--mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly::
+Mounts your AsciiDoc repository to /src in the container.  This must be a Git repository containing at least one Antora module.
+
+spjmurray/couchbase-antora-preview:0.0.1::
+This is the name of the container image to use.
+
+master::
+Argument passed to the container entry point.  This selects the Git branch to generate static content from.
+
+docs/user::
+Argument passed to the container entry point.  This selects the path to the Antora module (containing antora.yml).
+
+NOTE: The container runs in an interactive shell, to stop execution simply press `Ctl+C`

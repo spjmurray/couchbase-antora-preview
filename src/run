@@ -1,0 +1,134 @@
+#!/usr/bin/python
+
+"""placeholder"""
+
+import argparse
+import logging
+import os
+import subprocess
+import sys
+import time
+import yaml
+
+BASE_REPO = 'docs-site'
+MODULE_REPO_PATH = '/src/'
+PLAYBOOK_SRC = 'staging-antora-playbook.yml'
+PLAYBOOK = 'anotora-preview-playbook.yml'
+ANTORA_HOME = '/antora'
+
+
+class Executor(object):
+    """
+    Helper functions for execution of external commands
+    """
+
+    @staticmethod
+    def _execute(command, env):
+        """Execute a command returning the exit code and output"""
+
+        logging.debug('Executing command: %s', ' '.join(command))
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        stdout, stderr = proc.communicate()
+        return proc.returncode, stdout, stderr
+
+    @staticmethod
+    def execute(command, env=None):
+        """Execute a command saving the output to the debug logs"""
+
+        returncode, stdout, stderr = Executor._execute(command, env=env)
+        logging.debug('stdout: \n%s', stdout)
+        logging.debug('stderr: \n%s', stderr)
+        if returncode != 0:
+            raise RuntimeError
+        return stdout, stderr
+
+
+def init_logging(debug):
+    """Setup logging to stdout with nice formatting"""
+
+    level = logging.INFO
+    if debug:
+        level = logging.DEBUG
+
+    logging.getLogger().setLevel(level)
+    formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d %(levelname)s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    logging.getLogger().addHandler(handler)
+
+
+def init_repo(args):
+    """Clone the most recent Couchbase docs repo, patch in our module, generate content"""
+
+    logging.info('Cloning latest document repository ...')
+    os.chdir(ANTORA_HOME)
+    Executor.execute(['git', 'clone', 'https://github.com/couchbase/' + BASE_REPO])
+
+    logging.info('Creating site playbook ...')
+    os.chdir(ANTORA_HOME + '/' + BASE_REPO)
+    with open(PLAYBOOK_SRC) as filedesc:
+        playbook = yaml.load(filedesc.read())
+
+    playbook['site']['url'] = 'http://localhost'
+    playbook['content']['sources'] = [
+        {
+            'url': '.',
+            'branches': 'HEAD',
+            'start_path': 'home',
+        },
+        {
+            'url': MODULE_REPO_PATH,
+            'branches': args.branch,
+            'start_path': args.path,
+        }
+    ]
+    # Gets screwed up by read/dump :/
+    del playbook['ui']['supplemental_files']
+
+    with open(PLAYBOOK, 'w') as filedesc:
+        filedesc.write(yaml.dump(playbook, default_flow_style=False))
+
+    logging.info("Generating static content ...")
+    os.chdir(ANTORA_HOME + '/' + BASE_REPO)
+    Executor.execute(['antora', PLAYBOOK])
+
+
+def init_httpd():
+    """Start the HTTP daemon when the vhost directory is created"""
+
+    logging.info('Starting webserver ...')
+    Executor.execute(['httpd', '-k', 'start'])
+
+
+def init_slumber():
+    """Sleep until we are killed"""
+
+    logging.info('Serving content on http://localhost:8080, press Ctl+C to exit ...')
+    while True:
+        time.sleep(10)
+
+
+def main():
+    """Parse arguments, setup logging and run the main meat"""
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true', default=False)
+    parser.add_argument('branch')
+    parser.add_argument('path')
+    args = parser.parse_args()
+
+    init_logging(debug=args.debug)
+
+    try:
+        init_repo(args)
+        init_httpd()
+        init_slumber()
+    except KeyboardInterrupt:
+        logging.info('Caught interrupt exitting ...')
+
+
+if __name__ == '__main__':
+    main()
+
+# vi: ts=4 et:
