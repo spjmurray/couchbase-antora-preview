@@ -188,7 +188,7 @@ def main():
         init_httpd()
         init_slumber()
     except KeyboardInterrupt:
-        logging.info('Caught interrupt exitting ...')
+        logging.info('Caught interrupt exiting ...')
 
 
 if __name__ == '__main__':
