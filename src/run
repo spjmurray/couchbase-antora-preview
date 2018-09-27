@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
-"""placeholder"""
+"""
+Couchbase Antora Previewer
+
+Simply clones the base Couchbase documentation site, patches in user
+specified repositories, then exposes the generated static content via
+a web server.
+"""
 
 import argparse
 import logging
