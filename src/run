@@ -11,7 +11,6 @@ import time
 import yaml
 
 BASE_REPO = 'docs-site'
-MODULE_REPO_PATH = '/src/'
 PLAYBOOK_SRC = 'staging-antora-playbook.yml'
 PLAYBOOK = 'anotora-preview-playbook.yml'
 ANTORA_HOME = '/antora'
@@ -43,11 +42,11 @@ class Executor(object):
         return stdout, stderr
 
 
-def init_logging(debug):
+def init_logging(args):
     """Setup logging to stdout with nice formatting"""
 
     level = logging.INFO
-    if debug:
+    if args.debug:
         level = logging.DEBUG
 
     logging.getLogger().setLevel(level)
@@ -56,6 +55,39 @@ def init_logging(debug):
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
+
+
+def get_repo_homes(args):
+    """Given repo specifications get home pages for file based repos only"""
+
+    paths = []
+    for repo in args.repos:
+        # Reject non absolute paths
+        if repo['url'][0] != '/':
+            continue
+
+        # Work out where the yaml configuration is
+        repo_config_file = repo['url']
+        if 'start_path' in repo:
+            repo_config_file += '/' + repo['start_path']
+        repo_config_file += '/antora.yml'
+
+        # Get the start page, defaulting to 'index'
+        with open(repo_config_file) as filedesc:
+            repo_config = yaml.load(filedesc.read())
+
+        start_page = 'index'
+        if 'start_page' in repo_config:
+            module, filename = tuple(repo_config['start_page'].split(':'))
+            start_page, _ = os.path.splitext(filename)
+            if module != 'ROOT':
+                start_page = module + '/' + start_page
+
+        host = 'http://localhost:' + args.port
+        path = '/' + repo_config['name'] + '/' + repo_config['version'] + '/' + start_page + '.html'
+        paths.append(host + path)
+
+    return paths
 
 
 def init_repo(args):
@@ -70,37 +102,32 @@ def init_repo(args):
     with open(PLAYBOOK_SRC) as filedesc:
         playbook = yaml.load(filedesc.read())
 
-    playbook['site']['url'] = 'http://localhost'
+    site_url = 'http://localhost:' + args.port
+    playbook['site']['url'] = site_url
     playbook['content']['sources'] = [
         {
             'url': '.',
             'branches': 'HEAD',
             'start_path': 'home',
         },
-        {
-            'url': MODULE_REPO_PATH,
-            'branches': args.branch,
-            'start_path': args.path,
-        }
     ]
+    playbook['content']['sources'] += args.repos
+
     # Gets screwed up by read/dump :/
     del playbook['ui']['supplemental_files']
 
+    playbook_yaml = yaml.dump(playbook, default_flow_style=False)
+    logging.debug(playbook_yaml)
     with open(PLAYBOOK, 'w') as filedesc:
-        filedesc.write(yaml.dump(playbook, default_flow_style=False))
+        filedesc.write(playbook_yaml)
 
     logging.info("Generating static content ...")
     os.chdir(ANTORA_HOME + '/' + BASE_REPO)
     Executor.execute(['antora', PLAYBOOK])
 
-    # Calculate the URL to report back to the user
-    with open(MODULE_REPO_PATH + args.path + '/antora.yml') as filedesc:
-        module = yaml.load(filedesc.read())
-
-    page, _ = os.path.splitext(module['start_page'].split(':')[1])
-    url = module['name'] + '/' + module['version'] + '/' + page + '.html'
-
-    logging.info('Serving content on http://localhost:8080/%s', url)
+    logging.info('Serving content on %s', site_url)
+    for home in get_repo_homes(args):
+        logging.info('Serving repo content on %s', home)
 
 
 def init_httpd():
@@ -118,16 +145,37 @@ def init_slumber():
         time.sleep(10)
 
 
+def parse_repos(args):
+    """Parses raw repo arguments and expands them into a repos argument"""
+
+    # Process specified repositories.
+    # We expect 'url=/mnt/docs,branches=master:1.0.0,start_path=docs'
+    repos = []
+    for repo in args.repo:
+        repo_args = dict(tuple(arg.split('=')) for arg in repo.split(','))
+        required = [
+            'url',
+        ]
+        for req in required:
+            if req not in repo_args:
+                logging.error('Missing %s argument in repo specification')
+        if 'branches' in repo_args:
+            repo_args['branches'] = repo_args['branches'].split(':')
+        repos.append(repo_args)
+    setattr(args, 'repos', repos)
+
+
 def main():
     """Parse arguments, setup logging and run the main meat"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true', default=False)
-    parser.add_argument('branch')
-    parser.add_argument('path')
+    parser.add_argument('-p', '--port', default='8080')
+    parser.add_argument('-r', '--repo', action='append', required=True)
     args = parser.parse_args()
 
-    init_logging(debug=args.debug)
+    init_logging(args)
+    parse_repos(args)
 
     try:
         init_repo(args)

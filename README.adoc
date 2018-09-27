@@ -33,8 +33,8 @@ docker run --rm -ti \
   --publish 8080:80 \
   --mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly \
   spjmurray/couchbase-antora-preview:1.0.1 \
-  master \
-  docs/user
+  --port 8080 \
+  --repo url=/src,branches=master:1.0.x,start_path=docs/user
 ----
 
 At present all arguments are required, however certain arguments may be modified to suit your particular Antora module.
@@ -46,18 +46,18 @@ Removes the container once execution has terminated.
 Allocate a pseudo terminal and allow input.
 
 --publish 8080:80::
-Bind unprivileged port 8080 on the host system to port 80 on the container.
+Bind unprivileged port 8080 on the host system to port 80 on the container.  By default the static content will be generated with this port.  If you wish to use a different host port please specify the `--port` argument to the container entry point.
 
 --mount type=bind,source=/home/simon/go/src/github.com/couchbase/couchbase-operator,target=/src,readonly::
-Mounts your AsciiDoc repository to /src in the container.  This must be a Git repository containing at least one Antora module.
+Mounts your AsciiDoc repository in the container.  This must be a Git repository containing at least one Antora module.  Mounts can be placed where you like and may be refered to by the `--repo` argument of the container.
 
 spjmurray/couchbase-antora-preview:1.0.1::
 This is the name of the container image to use.  Pre-built images are avaialble on https://hub.docker.com/r/spjmurray/couchbase-antora-preview/[Docker Hub].
 
-master::
-Argument passed to the container entry point.  This selects the Git branch to generate static content from.
+--port 8080::
+The host port mapping to the container web server.  This argument is optional and defaults to 8080.
 
-docs/user::
-Argument passed to the container entry point.  This selects the path to the Antora module (containing antora.yml).
+--repo url=/src,branches=master:1.0.x,start_path=docs/user::
+This argument is passed to the container entry point.  This specifies a repository to be added to the Antora playbook.  The `url` parameter is required and specifies the path to a mounted git repository or a reference to github.  The `branches` parameter is optional and specifies which branches to use for document generation.  The `start_path` parameter is used to select the path within the repository to find the `antora.yml` module configuration.  For further details please consult the https://docs.antora.org/antora/1.1/playbook/configure-content-sources/[Antora documentation].
 
 NOTE: The container runs in an interactive shell, to stop execution simply press `Ctl+C`
