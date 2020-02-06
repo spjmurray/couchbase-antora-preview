@@ -1,5 +1,5 @@
 DOCKER_IMAGE=spjmurray/couchbase-antora-preview
-DOCKER_TAG=1.2.0
+DOCKER_TAG=1.3.0
 
 .PHONY: all
 all:
@@ -11,6 +11,6 @@ requirements:
 	pip install -r requirements.txt
 
 .PHONY: release
-release:
+release: all
 	docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
 	docker push ${DOCKER_IMAGE}:latest
