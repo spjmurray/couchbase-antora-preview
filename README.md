@@ -42,7 +42,7 @@ Mounts your AsciiDoc repository in the container.
 This must be a Git repository containing at least one Antora module.
 Mount targets can be placed where you like and will be referred to by the [`--repo`](#repo) argument of the container.
 
-#### <a name="image"></a>`spjmurray/couchbase-antora-preview:1.2.0`
+#### <a name="image"></a>`spjmurray/couchbase-antora-preview:latest`
 
 This is the name of the container image to use.
 Pre-built images are available on [Docker Hub](https://hub.docker.com/r/spjmurray/couchbase-antora-preview/).
