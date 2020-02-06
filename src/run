@@ -154,6 +154,11 @@ def init_slumber():
 def parse_repos(args):
     """Parses raw repo arguments and expands them into a repos argument"""
 
+    # If no repos are provided provide a default
+    if not args.repo:
+        logging.info('Using default repo path /src')
+        args.repo = ['url=/src']
+
     # Process specified repositories.
     # We expect 'url=/mnt/docs,branches=master:1.0.0,start_path=docs'
     repos = []
@@ -165,16 +170,39 @@ def parse_repos(args):
         for req in required:
             if req not in repo_args:
                 logging.error('Missing %s argument in repo specification')
+
+        # Enter the git repo for the duration
+        os.chdir(repo_args['url'])
+
+        # Parse the selected branches or derive the current branch
         if 'branches' in repo_args:
             repo_args['branches'] = repo_args['branches'].split(':')
         else:
-            # Derive the current branch
             if repo_args['url'].startswith('/'):
-                os.chdir(repo_args['url'])
                 stdout, _ = Executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
-                repo_args['branches'] = [stdout.strip()]
+                branch = stdout.strip()
+                logging.info("Using branch %s", branch)
+                repo_args['branches'] = [branch]
+
+        # Derive the start path
+        if 'start_path' not in repo_args:
+            done = False
+            for root, _, files in os.walk('.'):
+                if done:
+                    break
+                for filename in files:
+                    if filename == 'antora.yml':
+                        logging.info('Using path %s', root)
+                        repo_args['start_path'] = root
+                        done = True
+                        break
+        if not done:
+            logging.error('Unable to find antora.yml')
+            sys.exit(1)
+
         repos.append(repo_args)
-    setattr(args, 'repos', repos)
+
+    args.repos = repos
 
 
 def main():
@@ -183,7 +211,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true', default=False)
     parser.add_argument('-p', '--port', default='8080')
-    parser.add_argument('-r', '--repo', action='append', required=True)
+    parser.add_argument('-r', '--repo', action='append')
     args = parser.parse_args()
 
     init_logging(args)
