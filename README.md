@@ -40,19 +40,19 @@ This argument is required to expose the HTTP service.
 
 Mounts your AsciiDoc repository in the container.
 This must be a Git repository containing at least one Antora module.
-Mount targets can be placed where you like and will be refered to by the [`--repo`](#--repo-urlsrcbranchesgit-rev-parse-headstart_pathdocsuser) argument of the container.
+Mount targets can be placed where you like and will be referred to by the [`--repo`](#--repo-urlsrcbranchesgit-rev-parse-headstart_pathdocsuser) argument of the container.
 
 #### `spjmurray/couchbase-antora-preview:1.2.0`
 
 This is the name of the container image to use.
-Pre-built images are avaialble on [Docker Hub](https://hub.docker.com/r/spjmurray/couchbase-antora-preview/).
+Pre-built images are available on [Docker Hub](https://hub.docker.com/r/spjmurray/couchbase-antora-preview/).
 
 ### Container Arguments
 
 #### `--port 8080`
 
 The host port mapping to the container web server.
-This arument must be the same as that defined in the [`--publish`](#--publish-808080) argument.
+This argument must be the same as that defined in the [`--publish`](#--publish-808080) argument.
 This argument is optional and defaults to 8080.
 
 #### `--repo url=/src,branches=$(git rev-parse HEAD),start_path=docs/user`
@@ -60,7 +60,7 @@ This argument is optional and defaults to 8080.
 This argument is passed to the container entry point.
 This specifies a repository to be added to the Antora playbook.
 
-The `url` parameter is required and specifies the path to a mounted git repository or a reference to github.
+The `url` parameter is required and specifies the path to a mounted git repository or a reference to GitHub.
 This must match the mount target specified in the [`--mount`](#--mount-typebindsourcepwdtargetsrcreadonly) argument.
 
 The `branches` parameter is optional and specifies which branches, tags or hash references to use for document generation.
@@ -70,7 +70,7 @@ For further details please consult the [Antora documentation](https://docs.antor
 
 ## Contributing
 
-Pull requests are welcomed, as are issues via github.
+Pull requests are welcomed, as are issues via GitHub.
 
 ### Build Pre-requisites
 

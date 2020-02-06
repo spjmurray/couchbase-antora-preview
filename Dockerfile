@@ -1,6 +1,6 @@
 FROM antora/antora:2.2.0
 
-# We content will be exposed on the standard HTTP port.
+# The content will be exposed on the standard HTTP port.
 EXPOSE 80/tcp
 
 # Install git to clone the docs repo, apache to serve up the we content and
