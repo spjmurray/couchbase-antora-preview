@@ -167,6 +167,12 @@ def parse_repos(args):
                 logging.error('Missing %s argument in repo specification')
         if 'branches' in repo_args:
             repo_args['branches'] = repo_args['branches'].split(':')
+        else:
+            # Derive the current branch
+            if repo_args['url'].startswith('/'):
+                os.chdir(repo_args['url'])
+                stdout, _ = Executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+                repo_args['branches'] = [stdout.strip()]
         repos.append(repo_args)
     setattr(args, 'repos', repos)
 

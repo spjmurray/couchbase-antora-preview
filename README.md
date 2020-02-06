@@ -13,7 +13,7 @@ $ docker run --rm -ti \
   --publish 8080:80 \
   --mount type=bind,source=${PWD},target=/src,readonly \
   spjmurray/couchbase-antora-preview:latest \
-  --repo url=/src,branches=$(git rev-parse HEAD),start_path=docs/user
+  --repo url=/src,start_path=docs/user
 ```
 
 ## Arguments
@@ -55,7 +55,7 @@ The host port mapping to the container web server.
 This argument must be the same as that defined in the [`--publish`](#publish) argument.
 This argument is optional and defaults to 8080.
 
-#### <a name="repo"></a>`--repo url=/src,branches=$(git rev-parse HEAD),start_path=docs/user`
+#### <a name="repo"></a>`--repo url=/src,branches=master,start_path=docs/user`
 
 This argument is passed to the container entry point.
 This specifies a repository to be added to the Antora playbook.
@@ -63,7 +63,8 @@ This specifies a repository to be added to the Antora playbook.
 The `url` parameter is required and specifies the path to a mounted git repository or a reference to GitHub.
 This must match the mount target specified in the [`--mount`](#mount) argument.
 
-The `branches` parameter is optional and specifies which branches, tags or hash references to use for document generation.
+The `branches` parameter is optional and specifies which branches to use for document generation.
+Branches are colon (`:`) separated.
 
 The `start_path` parameter is used to select the path within the repository to find the `antora.yml` module configuration. 
 For further details please consult the [Antora documentation](https://docs.antora.org/antora/1.1/playbook/configure-content-sources/).
