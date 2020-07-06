@@ -17,7 +17,7 @@ import time
 import yaml
 
 BASE_REPO = 'docs-site'
-PLAYBOOK_SRC = 'production-antora-playbook.yml'
+PLAYBOOK_SRC = 'antora-playbook.yml'
 PLAYBOOK = 'anotora-preview-playbook.yml'
 ANTORA_HOME = '/antora'
 
