@@ -1,5 +1,5 @@
 DOCKER_IMAGE=spjmurray/couchbase-antora-preview
-DOCKER_TAG=1.4.1
+DOCKER_TAG=1.4.2
 
 .PHONY: all
 all:
