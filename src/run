@@ -119,9 +119,6 @@ def init_repo(args):
     ]
     playbook['content']['sources'] += args.repos
 
-    # Gets screwed up by read/dump :/
-    del playbook['ui']['supplemental_files']
-
     playbook_yaml = yaml.dump(playbook, default_flow_style=False)
     logging.debug(playbook_yaml)
     with open(PLAYBOOK, 'w') as filedesc:
