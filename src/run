@@ -41,8 +41,8 @@ class Executor(object):
         """Execute a command saving the output to the debug logs"""
 
         returncode, stdout, stderr = Executor._execute(command, env=env)
-        logging.debug('stdout: \n%s', stdout)
-        logging.debug('stderr: \n%s', stderr)
+        logging.debug('stdout: \n%s', stdout.decode('utf-8'))
+        logging.debug('stderr: \n%s', stderr.decode('utf-8'))
         if returncode != 0:
             raise RuntimeError
         return stdout, stderr
@@ -114,6 +114,7 @@ def init_repo(args):
     playbook['content']['sources'] = args.repos
 
     # Remove crap that causes fail.
+    del playbook['site']['start_page']
     del playbook['urls']
 
     playbook_yaml = yaml.dump(playbook, default_flow_style=False)
