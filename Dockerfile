@@ -1,4 +1,4 @@
-FROM antora/antora:2.2.0
+FROM antora/antora:2.3.0
 
 # The content will be exposed on the standard HTTP port.
 EXPOSE 80/tcp
@@ -8,8 +8,8 @@ EXPOSE 80/tcp
 RUN apk --no-cache add \
     git \
     apache2 \
-    python \
-    py-yaml
+    python3 \
+    py3-yaml
 
 # Add a virtual host for Apache to serve requests on port 80.
 COPY res/vhost.conf /etc/apache2/conf.d/

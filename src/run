@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
 Couchbase Antora Previewer
@@ -80,11 +80,11 @@ def get_repo_homes(args):
 
         # Get the start page, defaulting to 'index'
         with open(repo_config_file) as filedesc:
-            repo_config = yaml.load(filedesc.read())
+            repo_config = yaml.safe_load(filedesc.read())
 
         start_page = 'index'
         if 'start_page' in repo_config:
-            module, filename = tuple(repo_config['start_page'].split(':'))
+            module, filename = tuple(str(repo_config['start_page']).split(':'))
             start_page, _ = os.path.splitext(filename)
             if module != 'ROOT':
                 start_page = module + '/' + start_page
@@ -106,8 +106,9 @@ def init_repo(args):
     logging.info('Creating site playbook ...')
     os.chdir(ANTORA_HOME + '/' + BASE_REPO)
     with open(PLAYBOOK_SRC) as filedesc:
-        playbook = yaml.load(filedesc.read())
+        playbook = yaml.safe_load(filedesc.read())
 
+    # Override anything to limit scope to this repo only.
     site_url = 'http://localhost:' + args.port
     playbook['site']['url'] = site_url
     playbook['content']['sources'] = [
@@ -118,6 +119,9 @@ def init_repo(args):
         },
     ]
     playbook['content']['sources'] += args.repos
+
+    # Remove crap that causes fail.
+    del playbook['urls']
 
     playbook_yaml = yaml.dump(playbook, default_flow_style=False)
     logging.debug(playbook_yaml)
@@ -177,7 +181,7 @@ def parse_repos(args):
         else:
             if repo_args['url'].startswith('/'):
                 stdout, _ = Executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
-                branch = stdout.strip()
+                branch = stdout.decode('utf-8').strip()
                 logging.info("Using branch %s", branch)
                 repo_args['branches'] = [branch]
 
