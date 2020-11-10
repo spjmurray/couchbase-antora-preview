@@ -111,14 +111,7 @@ def init_repo(args):
     # Override anything to limit scope to this repo only.
     site_url = 'http://localhost:' + args.port
     playbook['site']['url'] = site_url
-    playbook['content']['sources'] = [
-        {
-            'url': '.',
-            'branches': 'HEAD',
-            'start_path': 'home',
-        },
-    ]
-    playbook['content']['sources'] += args.repos
+    playbook['content']['sources'] = args.repos
 
     # Remove crap that causes fail.
     del playbook['urls']
