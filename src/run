@@ -188,7 +188,7 @@ def parse_repos(args):
                 for filename in files:
                     if filename == 'antora.yml':
                         logging.info('Using path %s', root)
-                        repo_args['start_path'] = root
+                        repo_args['start_path'] = root[2:]
                         done = True
                         break
         if not done:
