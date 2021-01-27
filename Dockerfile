@@ -1,4 +1,4 @@
-FROM antora/antora:2.3.0
+FROM antora/antora:2.3.4
 
 # The content will be exposed on the standard HTTP port.
 EXPOSE 80/tcp
