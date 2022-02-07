@@ -1,7 +1,10 @@
-FROM antora/antora:3.0.0-alpha.1
+FROM antora/antora:3.0.1
 
 # The content will be exposed on the standard HTTP port.
 EXPOSE 80/tcp
+
+RUN npm install \
+    asciidoctor-kroki
 
 # Install git to clone the docs repo, apache to serve up the we content and
 # python to process the playbooks.
