@@ -99,10 +99,6 @@ def get_repo_homes(args):
 def init_repo(args):
     """Clone the most recent Couchbase docs repo, patch in our module, generate content"""
 
-    logging.info('Cloning latest document repository ...')
-    os.chdir(ANTORA_HOME)
-    Executor.execute(['git', 'clone', 'https://github.com/couchbase/' + BASE_REPO])
-
     logging.info('Creating site playbook ...')
     os.chdir(ANTORA_HOME + '/' + BASE_REPO)
     with open(PLAYBOOK_SRC) as filedesc:
@@ -124,7 +120,7 @@ def init_repo(args):
 
     logging.info("Generating static content ...")
     os.chdir(ANTORA_HOME + '/' + BASE_REPO)
-    Executor.execute(['antora', PLAYBOOK])
+    Executor.execute(['antora', PLAYBOOK, '--stacktrace'])
 
     logging.info('Serving content on %s', site_url)
     for home in get_repo_homes(args):
